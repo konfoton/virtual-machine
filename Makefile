@@ -1,27 +1,33 @@
-CXX      := clang++
+CXX      := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -O2
-LDFLAGS  :=
 
 TARGET   := vm
-SRCS     := main.cpp vm.cpp assembler.cpp
-HDRS     := opcodes.h value.h vm.h assembler.h
-OBJS     := $(SRCS:.cpp=.o)
+INCLUDE_DIR := include
+BUILD_DIR := build
+SRC_DIR := src
+HDRS := $(INCLUDE_DIR)/opcodes.h $(INCLUDE_DIR)/value.h $(INCLUDE_DIR)/vm.h $(INCLUDE_DIR)/assembler.h
+OBJS := $(BUILD_DIR)/vm.o $(BUILD_DIR)/assembler.o $(BUILD_DIR)/main.o
 
-.PHONY: all clean run debug
+.PHONY: all clean run
 
-all: $(TARGET)
+all: $(BUILD_DIR) $(BUILD_DIR)/$(TARGET) 
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
+$(BUILD_DIR):
+	mkdir -p $@
+$(BUILD_DIR)/$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-%.o: %.cpp $(HDRS)
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(BUILD_DIR)/vm.o: $(SRC_DIR)/vm.cpp $(HDRS)
+	$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
-debug: CXXFLAGS += -g -O0 -DDEBUG
-debug: clean $(TARGET)
+$(BUILD_DIR)/assembler.o: $(SRC_DIR)/assembler.cpp $(HDRS)
+	$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
-run: $(TARGET)
-	./$(TARGET)
+$(BUILD_DIR)/main.o: $(SRC_DIR)/main.cpp $(HDRS)
+	$(CXX) $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
+
+run: $(BUILD_DIR)/$(TARGET)
+	./$(BUILD_DIR)/$(TARGET)
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf $(BUILD_DIR)
