@@ -1,8 +1,9 @@
-#include "vm.h"
-#include "assembler.h"
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+
+#include "assembler.h"
+#include "vm.h"
 
 // ============================================================================
 // Example Programs
@@ -425,70 +426,73 @@ static const char* PROGRAM_GC = R"(
 // ============================================================================
 
 static void runProgram(const std::string& name, const char* source) {
-    std::cout << "\n========== " << name << " ==========\n" << std::endl;
+  std::cout << "\n========== " << name << " ==========\n" << std::endl;
 
-    Assembler assembler;
-    try {
-        auto result = assembler.assemble(source);
+  Assembler assembler;
+  try {
+    auto result = assembler.assemble(source);
 
-        // Print disassembly
-        std::cout << "--- Disassembly ---" << std::endl;
-        std::cout << Assembler::disassemble(result.instructions, result.constants);
-        std::cout << "-------------------" << std::endl;
+    // Print disassembly
+    std::cout << "--- Disassembly ---" << std::endl;
+    std::cout << Assembler::disassemble(result.instructions, result.constants);
+    std::cout << "-------------------" << std::endl;
 
-        VirtualMachine vm;
-        vm.loadProgram(result.instructions, result.constants);
-        // vm.setTrace(true); // uncomment for instruction tracing
+    VirtualMachine vm;
+    vm.loadProgram(result.instructions, result.constants);
+    // vm.setTrace(true); // uncomment for instruction tracing
 
-        std::cout << "\n--- Output ---" << std::endl;
-        auto execResult = vm.run();
+    std::cout << "\n--- Output ---" << std::endl;
+    auto execResult = vm.run();
 
-        std::cout << "\n--- Stats ---" << std::endl;
-        auto& stats = vm.stats();
-        std::cout << "Instructions executed: " << stats.instructionsExecuted << std::endl;
-        std::cout << "Function calls:       " << stats.functionCalls << std::endl;
-        std::cout << "Memory allocations:   " << stats.memoryAllocations << std::endl;
-        std::cout << "Peak stack depth:     " << stats.peakStackDepth << std::endl;
+    std::cout << "\n--- Stats ---" << std::endl;
+    auto& stats = vm.stats();
+    std::cout << "Instructions executed: " << stats.instructionsExecuted
+              << std::endl;
+    std::cout << "Function calls:       " << stats.functionCalls << std::endl;
+    std::cout << "Memory allocations:   " << stats.memoryAllocations
+              << std::endl;
+    std::cout << "Peak stack depth:     " << stats.peakStackDepth << std::endl;
 
-        if (execResult == VirtualMachine::ExecResult::ERROR) {
-            std::cout << "** Program terminated with error **" << std::endl;
-        }
-
-    } catch (const AssemblerError& e) {
-        std::cerr << "Assembly error: " << e.what() << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+    if (execResult == VirtualMachine::ExecResult::ERROR) {
+      std::cout << "** Program terminated with error **" << std::endl;
     }
+
+  } catch (const AssemblerError& e) {
+    std::cerr << "Assembly error: " << e.what() << std::endl;
+  } catch (const std::exception& e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  }
 }
 
 int main(int argc, char* argv[]) {
-    std::cout << "=== Complex Virtual Machine ===" << std::endl;
-    std::cout << "Registers: R0-R15 + RSP, RFP, RPC, RFLAGS, RRV" << std::endl;
-    std::cout << "Features: Stack, Heap, Functions, Exceptions, Arrays, FP Math" << std::endl;
+  std::cout << "=== Complex Virtual Machine ===" << std::endl;
+  std::cout << "Registers: R0-R15 + RSP, RFP, RPC, RFLAGS, RRV" << std::endl;
+  std::cout << "Features: Stack, Heap, Functions, Exceptions, Arrays, FP Math"
+            << std::endl;
 
-    if (argc > 1) {
-        // Load from file
-        std::string filename = argv[1];
-        std::ifstream file(filename);
-        if (!file.is_open()) {
-            std::cerr << "Error: cannot open file: " << filename << std::endl;
-            return 1;
-        }
-        std::ostringstream ss;
-        ss << file.rdbuf();
-        runProgram(filename, ss.str().c_str());
-        return 0;
+  if (argc > 1) {
+    // Load from file
+    std::string filename = argv[1];
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+      std::cerr << "Error: cannot open file: " << filename << std::endl;
+      return 1;
     }
-
-    // Run all built-in demos
-    runProgram("Fibonacci",       PROGRAM_FIBONACCI);
-    runProgram("Factorial",       PROGRAM_FACTORIAL);
-    runProgram("Bubble Sort",     PROGRAM_BUBBLESORT);
-    runProgram("Exception Demo",  PROGRAM_EXCEPTIONS);
-    runProgram("FP Math",         PROGRAM_MATH);
-    runProgram("Heap / Linked List", PROGRAM_HEAP);
-    runProgram("Sum of Squares",  PROGRAM_SUM_SQUARES);
-    runProgram("Garbage Collection", PROGRAM_GC);
-
+    std::ostringstream ss;
+    ss << file.rdbuf();
+    runProgram(filename, ss.str().c_str());
     return 0;
+  }
+
+  // Run all built-in demos
+  runProgram("Fibonacci", PROGRAM_FIBONACCI);
+  runProgram("Factorial", PROGRAM_FACTORIAL);
+  runProgram("Bubble Sort", PROGRAM_BUBBLESORT);
+  runProgram("Exception Demo", PROGRAM_EXCEPTIONS);
+  runProgram("FP Math", PROGRAM_MATH);
+  runProgram("Heap / Linked List", PROGRAM_HEAP);
+  runProgram("Sum of Squares", PROGRAM_SUM_SQUARES);
+  runProgram("Garbage Collection", PROGRAM_GC);
+
+  return 0;
 }
