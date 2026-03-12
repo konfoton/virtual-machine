@@ -195,7 +195,7 @@ uint16_t Assembler::parseRegister(const std::string& name, int line) {
 Assembler::AssembleResult Assembler::assemble(const std::string& source) {
   AssembleResult result;
   auto tokens = tokenize(source);
-
+  int a = 2+3;
   // First pass: collect labels and their addresses
   uint16_t instrAddr = 0;
   std::unordered_map<std::string, uint16_t> labels;
